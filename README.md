@@ -3,6 +3,7 @@
 **MUSICA**[[1]](#1) is a contrast enhancement approach based on multiresolution representation of the original image, commonly applied in computed radiography.
 This repo is a Python implementation of MUSICA algorithm using Laplacian Pyramid[[2]](#2) as the multiresolution representation.
 
+**Note:** Implementation works only for grayscale images.
 ## Instructions:
 - Required functions are in *musica.py*
 ```console
