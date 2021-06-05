@@ -127,7 +127,7 @@ def musica(img, L, params, plot=False):
         plt.title('Original')
         plt.subplot(1,2,2)
         plt.imshow(rs, cmap='gray')
-        plt.title('Reconstructed')
+        plt.title('After MUSICA')
         plt.show()
     return rs
 
