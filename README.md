@@ -7,12 +7,12 @@ This repo is a Python implementation of MUSICA algorithm using Laplacian Pyramid
 ## Instructions:
 - Required functions are in *musica.py*
 ```console
-$ git clone https://github.com/lafith/MUSICA.git
+$ git clone https://github.com/lafith/musica.git
 $ cd MUSICA
 $ pip install -r requirements.txt
-$ python3 test.py
+$ python3 demo.py
 ```
-- In *test.py* arbitrary values are taken for parameters, tuning may give better results.
+- In *demo.py* arbitrary values are taken for parameters, tuning may give better results.
 ## Result:
 - Sample image is taken from [ieee8023/covid-chestxray-dataset](https://github.com/ieee8023/covid-chestxray-dataset/blob/master/images/a7e0a141.jpg)
 ![test_result](https://user-images.githubusercontent.com/39316548/120895618-70a28000-c63b-11eb-87fb-04c8b21aac5b.png)
