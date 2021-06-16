@@ -83,6 +83,26 @@ def read_tiff(path):
     return img
 
 
+def isPowerofTwo(x):
+    # check if number x is a power of two
+    return x and (not(x & (x - 1)))
+
+
+def findNextPowerOf2(n):
+    # taken from https://www.techiedelight.com/round-next-highest-power-2/
+    # Function will find next power of 2
+
+    # decrement `n` (to handle cases when `n` itself
+    # is a power of 2)
+    n = n - 1
+    # do till only one bit is left
+    while n & n - 1:
+        n = n & n - 1  # unset rightmost bit
+    # `n` is now a power of two (less than `n`)
+    # return next power of 2
+    return n << 1
+
+
 def resize_image(img):
     """MUSICA works for dimension like 2^N*2^M.
     Hence padding is required for arbitrary shapes
@@ -99,8 +119,20 @@ def resize_image(img):
     """
     print('\nResizing image...')
     row, col = img.shape
-    rowdiff = int(np.power(2, np.ceil(np.log2(row)))) - row
-    coldiff = int(np.power(2, np.ceil(np.log2(col)))) - col
+    # check if dimensions are power of two
+    # if not pad the image accordingly
+    if isPowerofTwo(row):
+        rowdiff = 0
+    else:
+        nextpower = findNextPowerOf2(row)
+        rowdiff = nextpower - row
+
+    if isPowerofTwo(col):
+        coldiff = 0
+    else:
+        nextpower = findNextPowerOf2(col)
+        coldiff = nextpower - col
+
     img_ = np.pad(
             img,
             ((0, rowdiff), (0, coldiff)),
@@ -134,21 +166,24 @@ def gaussian_pyramid(img, L):
     return gp
 
 
-def laplacian_pyramid(gauss, L):
+def laplacian_pyramid(img, L):
     """Function for creating Laplacian Pyramid
 
     Parameters
     ----------
-    gauss : list
-        Guassian pyramid
+    img : numpy.ndarray
+        Input image or g0.
     L : Int
         Max layer of decomposition
 
     Returns
     -------
     list
-        list containing images from L_0 to L_L in order
+        list containing laplacian layers from L_0 to L_L in order
+    list
+        list containing layers of gauss pyramid
     """
+    gauss = gaussian_pyramid(img, L)
     print('\nCreating Laplacian pyramid...')
     # Laplacian Pyramid:
     lp = []
@@ -158,7 +193,7 @@ def laplacian_pyramid(gauss, L):
         tmp = gauss[layer] - tmp
         lp.append(tmp)
     lp.append(gauss[L])
-    return lp
+    return lp, gauss
 
 
 def enhance_coefficients(laplacian, L, params):
@@ -185,10 +220,15 @@ def enhance_coefficients(laplacian, L, params):
     a = params['a']
     for layer in range(L):
         x = laplacian[layer]
+        x[x < 0] = 0.0  # removing all negative coefficients
+        # x = np.abs(x)
         G = a[layer]*M
         print('Modifying Layer %d' % (layer))
         laplacian[layer] = G*np.multiply(
-                    np.divide(x, np.abs(x)),
+                    np.divide(
+                        x, np.abs(x),
+                        out=np.zeros_like(x),
+                        where=x != 0),
                     np.power(
                         np.divide(
                             np.abs(x), M), p))
@@ -242,8 +282,7 @@ def musica(img, L, params, plot=False):
         Final enhanced image with original dimensions
     """
     img_resized = resize_image(img)
-    gp = gaussian_pyramid(img_resized, L)
-    lp = laplacian_pyramid(gp, L)
+    lp, _ = laplacian_pyramid(img_resized, L)
     lp = enhance_coefficients(lp, L, params)
     rs = reconstruct_image(lp, L)
     rs = rs[:img.shape[0], :img.shape[1]]
