@@ -1,4 +1,4 @@
-# Multiscale image contrast amplification (MUSICA)
+# Multiscale image contrast amplification using Laplacian pyramid
 
 **MUSICA**[[1]](#1) is a contrast enhancement approach based on multiresolution representation of the original image, commonly applied in computed radiography.
 This repo is a Python implementation of MUSICA algorithm using Laplacian Pyramid[[2]](#2) as the multiresolution representation.
