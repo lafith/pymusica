@@ -15,4 +15,15 @@ params = {
 # reading grayscale image
 img = plt.imread('sample.jpg')  # gray scale image
 # run MUSICA:
-rs = musica(img, L, params, plot=True)
+img_enhanced = musica(img, L, params)
+
+# show and save result
+plt.figure()
+plt.subplot(121)
+plt.title("Original Image")
+plt.imshow(img, cmap="gray")
+plt.subplot(122)
+plt.title("After Enhancement")
+plt.imshow(img_enhanced, cmap="gray")
+plt.show()
+plt.imsave("contrast_enhanced.jpg", img_enhanced, cmap="gray")

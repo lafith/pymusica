@@ -1,5 +1,21 @@
+# Copyright (C) 2021  Lafith Mattara
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+# contact: lafithmattara@gmail.com
+
 # Script for running MUSICA algorithm on a grayscale image:
-# Written by Lafith Mattara on 2021-06-05
 
 
 import logging
@@ -10,11 +26,13 @@ from skimage.transform import pyramid_reduce, pyramid_expand
 
 logging.getLogger('matplotlib').setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
-#change level here for console output
+# change level here for console output
 logger.setLevel(logging.INFO)
 
 file_handler = logging.FileHandler('musica_py.log')
-formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s')
+formatter = logging.Formatter(
+        '%(asctime)s:%(levelname)s:%(name)s: %(message)s'
+        )
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
@@ -81,7 +99,7 @@ def resize_image(img):
     logger.info(
             'Image padded from [{},{}] to [{},{}]'.format(
                 img.shape[0], img.shape[1],
-                img_.shape[0],img_.shape[1]))
+                img_.shape[0], img_.shape[1]))
     return img_
 
 
@@ -143,24 +161,6 @@ def laplacian_pyramid(img, L):
     return lp, gauss
 
 
-# def enhance_coefficients_check(laplacian,L,a,p,M):
-    # lp = [0]*L
-    # for layer in range(L):
-        # x = laplacian[layer]
-        # a_ = a[layer]
-        # p_ = p[layer]
-        # new = np.zeros(laplacian[layer].shape)
-        # for i in range(laplacian[layer].shape[0]):
-            # for j in range(laplacian[layer].shape[1]):
-                # xx = x[i,j]
-                # if xx != 0:
-                    # x_r = xx/abs(xx)
-                    # new[i,j] = (a_*M)*x_r*((abs(xx)/M)**p_)
-                # else:
-                    # pass
-        # lp[layer] = new
-    # return lp
-
 def enhance_coefficients(laplacian, L, params):
     """Non linear operation of pyramid coefficients
 
@@ -186,14 +186,16 @@ def enhance_coefficients(laplacian, L, params):
     for layer in range(L):
         logger.info('Modifying Layer %d' % (layer))
         x = laplacian[layer]
-        x[x < 0] = 0.0  # removing all negative coefficients
+        # removing all negative coefficients:
+        # an attempt to reduce double edges
+        x[x < 0] = 0.0
         G = a[layer]*M
         laplacian[layer] = G*np.multiply(
             np.divide(
-                x, np.abs(x), out=np.zeros_like(x),where=x != 0),
+                x, np.abs(x), out=np.zeros_like(x), where=x != 0),
             np.power(
                 np.divide(
-                    np.abs(x), M), p[layer]))
+                    np.abs(x), M), p))
     return laplacian
 
 
@@ -216,7 +218,7 @@ def reconstruct_image(laplacian, L):
     logger.debug('Reconstructing image...')
     # Reconstructing original image from laplacian pyramid
     rs = laplacian[L]
-    for i in range(L-1, -1, -1): 
+    for i in range(L-1, -1, -1):
         rs = pyramid_expand(rs, preserve_range=True)
         rs = np.add(rs, laplacian[i])
         logger.debug('Layer %d completed' % (i))
